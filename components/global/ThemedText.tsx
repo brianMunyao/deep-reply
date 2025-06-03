@@ -27,7 +27,7 @@ export function ThemedText({
 	return (
 		<Text
 			style={[
-				{ color, fontFamily: 'Inter' },
+				{ color },
 				type === 'default' ? styles.default : undefined,
 				type === 'title' ? styles.title : undefined,
 				type === 'title2' ? styles.title2 : undefined,
@@ -55,7 +55,6 @@ const styles = StyleSheet.create({
 	title: {
 		fontSize: 32,
 		fontWeight: 'bold',
-		lineHeight: 32,
 	},
 	title2: {
 		fontSize: 23,
