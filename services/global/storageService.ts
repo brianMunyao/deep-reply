@@ -3,8 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const storageService = {
 	setItem: async (key: string, value: any): Promise<void> => {
 		try {
-			const stringValue =
-				typeof value === 'string' ? value : JSON.stringify(value);
+			const stringValue = JSON.stringify(value);
 			await AsyncStorage.setItem(key, stringValue);
 		} catch (error) {
 			console.error(`Error setting item with key "${key}":`, error);
@@ -14,7 +13,10 @@ const storageService = {
 	getItem: async <T = any>(key: string): Promise<T | null> => {
 		try {
 			const value = await AsyncStorage.getItem(key);
-			return value ? (JSON.parse(value) as T) : null;
+
+			let res = value ? (JSON.parse(value) as T) : null;
+
+			return res;
 		} catch (error) {
 			console.error(`Error getting item with key "${key}":`, error);
 			return null;
