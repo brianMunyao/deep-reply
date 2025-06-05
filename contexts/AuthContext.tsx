@@ -3,6 +3,7 @@ import { fetchProfileService } from '@/services/auth/fetchProfileService';
 import { loginService } from '@/services/auth/loginService';
 import storageService from '@/services/global/storageService';
 import { IUser } from '@/types/IUser';
+import { router } from 'expo-router';
 import React, {
 	createContext,
 	ReactNode,
@@ -12,6 +13,7 @@ import React, {
 } from 'react';
 
 interface AuthContextType {
+	isLoading: boolean;
 	user: IUser | null;
 	login: (user_handle: string, password: string) => Promise<void>;
 	logout: () => Promise<void>;
@@ -26,6 +28,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
+	const [isLoading, setIsLoading] = useState(true);
 	const [user, setUser] = useState<IUser | null>(null);
 
 	useEffect(() => {
@@ -34,11 +37,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 				LocalStorageKeys.TOKEN_KEY
 			);
 			if (storedToken) {
-				fetchProfile(storedToken);
+				await fetchProfile(storedToken);
+			} else {
+				router.navigate('/login');
 			}
 		};
 
-		loadToken();
+		loadToken().finally(() => setIsLoading(false));
 	}, []);
 
 	const login = async (user_handle: string, password: string) => {
@@ -66,10 +71,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 	const logout = async () => {
 		setUser(null);
 		await storageService.removeItem(LocalStorageKeys.TOKEN_KEY);
+		router.navigate('/main');
 	};
 
 	return (
-		<AuthContext.Provider value={{ user, login, logout }}>
+		<AuthContext.Provider value={{ isLoading, user, login, logout }}>
 			{children}
 		</AuthContext.Provider>
 	);
