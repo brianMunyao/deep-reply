@@ -16,7 +16,7 @@ dayjs.extend(relativeTime);
 
 type Props = {
 	comment: IComment;
-	onReply: (commentId: string) => void;
+	onReply: (comment: IComment) => void;
 	onViewMoreReplies?: (commentId: string) => void;
 	maxDepth?: number;
 	showViewMoreButton?: boolean;
@@ -177,7 +177,7 @@ const NestedCommentItem = ({
 
 							<TouchableOpacity
 								style={styles.actionButton}
-								onPress={() => onReply(comment.id)}
+								onPress={() => onReply(comment)}
 							>
 								{/* <Reply size={14} color={mutedColor} /> */}
 								<ThemedText style={styles.actionText}>

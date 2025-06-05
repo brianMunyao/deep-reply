@@ -4,7 +4,6 @@ import { router, useNavigation } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
 	ActivityIndicator,
-	Alert,
 	Animated,
 	Dimensions,
 	FlatList,
@@ -46,7 +45,6 @@ const PostDetailScreen = () => {
 		parentCommentId,
 	} = route.params as PostDetailScreenParams;
 
-	// State management
 	const [comments, setComments] = useState<IComment[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [refreshing, setRefreshing] = useState(false);
@@ -55,13 +53,13 @@ const PostDetailScreen = () => {
 	const [collapsedComments, setCollapsedComments] = useState<Set<string>>(
 		new Set()
 	);
+	const [mentionedUsers, setMentionedUsers] = useState<string[]>([]);
+
 	const [submitting, setSubmitting] = useState(false);
 
-	// Animation values
 	const fadeAnim = useState(new Animated.Value(0))[0];
 	const slideAnim = useState(new Animated.Value(50))[0];
 
-	// Theme colors
 	const tintColor = useThemeColor({}, 'tint');
 	const cardBackgroundColor = useThemeColor({}, 'cardBackground');
 	const buttonPrimaryBackground = useThemeColor(
@@ -73,7 +71,6 @@ const PostDetailScreen = () => {
 	const textColor = useThemeColor({}, 'text');
 	const borderColor = useThemeColor({}, 'separator');
 
-	// Memoized values
 	const maxDepth = useMemo(() => {
 		switch (commentLevel) {
 			case 'replies':
@@ -106,7 +103,6 @@ const PostDetailScreen = () => {
 		return sorted;
 	}, [comments]);
 
-	// Animation effects
 	useEffect(() => {
 		Animated.parallel([
 			Animated.timing(fadeAnim, {
@@ -182,26 +178,30 @@ const PostDetailScreen = () => {
 	const handleAddComment = async () => {
 		const trimmedComment = newComment.trim();
 		if (!trimmedComment) {
-			Alert.alert('Error', 'Please enter a comment');
+			toastService.error('Please enter a comment');
 			return;
 		}
 
 		if (trimmedComment.length > 1000) {
-			Alert.alert('Error', 'Comment is too long (max 1000 characters)');
+			toastService.error('Comment is too long (max 1000 characters)');
 			return;
 		}
 
 		setSubmitting(true);
+
 		try {
 			await commentService.createComment({
 				post_id: post.id,
 				content: trimmedComment,
 				reply_to: replyingTo || '',
-				mentioned_users: extractMentions(trimmedComment),
+				// using the user that we are replying to for now
+				// to be updated later
+				mentioned_users: mentionedUsers,
 				images: [],
 				gifs: [],
 			});
 
+			setMentionedUsers([]);
 			setNewComment('');
 			setReplyingTo(null);
 			toastService.success('Comment added successfully');
@@ -214,26 +214,14 @@ const PostDetailScreen = () => {
 		}
 	};
 
-	const extractMentions = (text: string): string[] => {
-		const mentionRegex = /@(\w+)/g;
-		const mentions: string[] = [];
-		let match;
-		while ((match = mentionRegex.exec(text)) !== null) {
-			mentions.push(match[1]);
-		}
-		return mentions;
-	};
+	const handleReply = useCallback((comment: IComment) => {
+		setReplyingTo(comment.id);
 
-	const handleReply = useCallback(
-		(commentId: string) => {
-			setReplyingTo(commentId);
-			const comment = comments.find((c) => c.id === commentId);
-			if (comment) {
-				setNewComment(`@${comment.user_details.user_handle} `);
-			}
-		},
-		[comments]
-	);
+		// for now we tag one at a time
+		setMentionedUsers([comment.user_details.id]);
+
+		setNewComment(`@${comment.user_details.user_handle} `);
+	}, []);
 
 	const handleViewMoreReplies = useCallback(
 		(commentId: string) => {
@@ -376,10 +364,8 @@ const PostDetailScreen = () => {
 			style={{ flex: 1 }}
 		>
 			<ThemedSafeAreaView style={[styles.container]}>
-				{/* Header for non-main levels */}
 				{commentLevel !== 'main' && renderBackButton(screenTitle)}
 
-				{/* Comments List */}
 				<FlatList
 					data={sortedComments}
 					keyExtractor={(item) => item.id}
