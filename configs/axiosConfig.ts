@@ -14,7 +14,9 @@ axiosClient.interceptors.request.use(
 		config.headers.set('X-Data-Source', 'staging');
 
 		if (!config.url?.includes('login')) {
-			const token = storageService.getItem(LocalStorageKeys.TOKEN_KEY);
+			const token = await storageService.getItem(
+				LocalStorageKeys.TOKEN_KEY,
+			);
 
 			if (token) {
 				config.headers.Authorization = `Bearer ${token}`;

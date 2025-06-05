@@ -1,17 +1,10 @@
 import axiosClient from '@/configs/axiosConfig';
 import ApiPaths from '@/constants/ApiPaths';
+import { ICommentNew } from '@/types/IComment';
 
-const createComment = async (
-	post_id: string,
-	content: string,
-	parent_id: string | null
-) => {
+const createComment = async (newComment: ICommentNew) => {
 	try {
-		const response = await axiosClient.post(ApiPaths.COMMENTS, {
-			post_id,
-			content,
-			parent_id,
-		});
+		const response = await axiosClient.post(ApiPaths.COMMENTS, newComment);
 		return response.data;
 	} catch (error: any) {
 		console.error(
@@ -22,9 +15,18 @@ const createComment = async (
 	}
 };
 
-const getComments = async () => {
+const getComments = async (filters: { post_id?: string; user_id?: string }) => {
 	try {
-		const response = await axiosClient.get(ApiPaths.COMMENTS);
+		const urlParams = new URLSearchParams();
+		if (filters?.post_id)
+			urlParams.set('post_id', filters?.post_id.toString());
+		if (filters?.user_id)
+			urlParams.set('user_id', filters?.user_id.toString());
+
+		const response = await axiosClient.get(
+			ApiPaths.COMMENTS + '?' + urlParams.toString()
+		);
+
 		return response.data;
 	} catch (error: any) {
 		console.error(
