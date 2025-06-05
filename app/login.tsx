@@ -5,6 +5,7 @@ import { ThemedTextInput } from '@/components/global/ThemedTextInput';
 import { useAuth } from '@/contexts/AuthContext';
 import { ILoginPayload } from '@/types/IUser';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
@@ -28,8 +29,8 @@ const LoginScreen = () => {
 		mode: 'onBlur',
 		resolver: zodResolver(schema),
 		defaultValues: {
-			user_handle: 'user_handle',
-			password: 'password',
+			user_handle: '',
+			password: '',
 		},
 	});
 
@@ -37,7 +38,7 @@ const LoginScreen = () => {
 		setIsLoading(true);
 		login(data.user_handle, data.password)
 			.then((res) => {
-				// success
+				router.navigate('/main');
 			})
 			.catch((err) => {
 				setFormError(err?.message);
