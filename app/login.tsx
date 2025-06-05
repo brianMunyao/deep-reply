@@ -8,7 +8,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+
 import * as z from 'zod';
 
 const LoginScreen = () => {
@@ -49,63 +50,70 @@ const LoginScreen = () => {
 	};
 
 	return (
-		<ThemedSafeAreaView style={styles.container}>
-			<ThemedText type="title" style={styles.title}>
-				Login
-			</ThemedText>
+		<KeyboardAvoidingView
+			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+			style={{ flex: 1 }}
+		>
+			<ThemedSafeAreaView style={styles.container}>
+				<ThemedText type="title" style={styles.title}>
+					Login
+				</ThemedText>
 
-			{formError && (
-				<ThemedText style={styles.formError}>{formError}</ThemedText>
-			)}
+				{formError && (
+					<ThemedText style={styles.formError}>
+						{formError}
+					</ThemedText>
+				)}
 
-			<View style={styles.inputsContainer}>
-				<Controller
-					name="user_handle"
-					control={control}
-					rules={{ required: true }}
-					render={({ field: { onChange, onBlur, value } }) => (
-						<ThemedTextInput
-							label="User Handle"
-							placeholder="Enter your user handle"
-							error={errors.user_handle?.message}
-							touched={touchedFields.user_handle}
-							value={value}
-							onChangeText={onChange}
-							onBlur={onBlur}
-							autoCapitalize="none"
-						/>
-					)}
-				/>
+				<View style={styles.inputsContainer}>
+					<Controller
+						name="user_handle"
+						control={control}
+						rules={{ required: true }}
+						render={({ field: { onChange, onBlur, value } }) => (
+							<ThemedTextInput
+								label="User Handle"
+								placeholder="Enter your user handle"
+								error={errors.user_handle?.message}
+								touched={touchedFields.user_handle}
+								value={value}
+								onChangeText={onChange}
+								onBlur={onBlur}
+								autoCapitalize="none"
+							/>
+						)}
+					/>
 
-				<Controller
-					name="password"
-					control={control}
-					rules={{ required: true }}
-					render={({ field: { onChange, onBlur, value } }) => (
-						<ThemedTextInput
-							label="Password"
-							placeholder="Enter your password"
-							error={errors.password?.message}
-							touched={touchedFields.password}
-							value={value}
-							onChangeText={onChange}
-							onBlur={onBlur}
-							textContentType="password"
-							secureTextEntry
-							autoCapitalize="none"
-						/>
-					)}
-				/>
-			</View>
+					<Controller
+						name="password"
+						control={control}
+						rules={{ required: true }}
+						render={({ field: { onChange, onBlur, value } }) => (
+							<ThemedTextInput
+								label="Password"
+								placeholder="Enter your password"
+								error={errors.password?.message}
+								touched={touchedFields.password}
+								value={value}
+								onChangeText={onChange}
+								onBlur={onBlur}
+								textContentType="password"
+								secureTextEntry
+								autoCapitalize="none"
+							/>
+						)}
+					/>
+				</View>
 
-			<View style={styles.buttonContainer}>
-				<ThemedButton
-					label="Login"
-					onPress={handleSubmit(onSubmit)}
-					loading={isLoading}
-				/>
-			</View>
-		</ThemedSafeAreaView>
+				<View style={styles.buttonContainer}>
+					<ThemedButton
+						label="Login"
+						onPress={handleSubmit(onSubmit)}
+						loading={isLoading}
+					/>
+				</View>
+			</ThemedSafeAreaView>
+		</KeyboardAvoidingView>
 	);
 };
 

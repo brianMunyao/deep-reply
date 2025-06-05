@@ -1,5 +1,11 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
+import {
+	KeyboardAvoidingView,
+	StyleSheet,
+	TouchableOpacity,
+	View,
+	ViewStyle,
+} from 'react-native';
 import Modal from 'react-native-modal';
 
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -42,56 +48,63 @@ const BottomSheetModal = ({
 				animationOut="slideOutDown"
 				backdropTransitionInTiming={1}
 				backdropTransitionOutTiming={1}
+				avoidKeyboard
 			>
-				<ThemedView
-					style={[
-						styles.container,
-						{
-							padding: hasInnerPadding ? 15 : 0,
-						},
-						containerStyle,
-					]}
-				>
-					{(title || showCloseButton) && (
-						<View
-							style={[
-								styles.header,
-								{
-									paddingHorizontal: hasInnerPadding ? 0 : 15,
-									paddingTop: hasInnerPadding ? 0 : 15,
-								},
-							]}
-						>
-							{title ? (
-								<ThemedText type="title3">{title}</ThemedText>
-							) : (
-								<View />
-							)}
+				<KeyboardAvoidingView behavior="padding">
+					<ThemedView
+						style={[
+							styles.container,
+							{
+								padding: hasInnerPadding ? 15 : 0,
+							},
+							containerStyle,
+						]}
+					>
+						{(title || showCloseButton) && (
+							<View
+								style={[
+									styles.header,
+									{
+										paddingHorizontal: hasInnerPadding
+											? 0
+											: 15,
+										paddingTop: hasInnerPadding ? 0 : 15,
+									},
+								]}
+							>
+								{title ? (
+									<ThemedText type="title3">
+										{title}
+									</ThemedText>
+								) : (
+									<View />
+								)}
 
-							{showCloseButton && (
-								<TouchableOpacity
-									style={[
-										styles.closeButton,
-										{
-											backgroundColor:
-												cardBackgroundColor,
-										},
-									]}
-									onPress={onClose}
-									activeOpacity={0.7}
-								>
-									<Ionicons
-										name="close"
-										size={20}
-										color={textColor}
-									/>
-								</TouchableOpacity>
-							)}
-						</View>
-					)}
+								{showCloseButton && (
+									<TouchableOpacity
+										style={[
+											styles.closeButton,
+											{
+												backgroundColor:
+													cardBackgroundColor,
+											},
+										]}
+										onPress={onClose}
+										activeOpacity={0.7}
+									>
+										<Ionicons
+											name="close"
+											size={20}
+											color={textColor}
+										/>
+									</TouchableOpacity>
+								)}
+							</View>
+						)}
 
-					{children}
-				</ThemedView>
+						{children}
+					</ThemedView>
+				</KeyboardAvoidingView>
 			</Modal>
 		</View>
 	);
