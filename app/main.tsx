@@ -90,7 +90,7 @@ const MainScreen: React.FC = () => {
 	};
 
 	const renderPost = ({ item }: { item: IPost }) => (
-		<View key={item.id} style={{ paddingHorizontal: 16 }}>
+		<View key={item.post_id} style={{ paddingHorizontal: 16 }}>
 			<PostCard
 				post={item}
 				onPress={() => handlePostPress(item)}
