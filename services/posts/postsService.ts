@@ -51,8 +51,10 @@ const getPosts = async (filters: {
 const deletePost = async (postId: string) => {
 	try {
 		const response = await axiosClient.delete(
-			`${ApiPaths.POSTS}/${postId}`
+			`${ApiPaths.POSTS}/${postId}`,
+			{ data: { posts_id: postId } }
 		);
+
 		return response.data;
 	} catch (error: any) {
 		console.error(

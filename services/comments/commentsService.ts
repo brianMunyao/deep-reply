@@ -69,9 +69,9 @@ const getDeepReplies = async (postId: string) => {
 
 const deleteComment = async (commentId: string) => {
 	try {
-		const response = await axiosClient.delete(
-			`${ApiPaths.COMMENTS}/${commentId}`
-		);
+		const response = await axiosClient.delete(`${ApiPaths.COMMENTS}`, {
+			data: { comment_id: commentId },
+		});
 		return response.data;
 	} catch (error: any) {
 		console.error(

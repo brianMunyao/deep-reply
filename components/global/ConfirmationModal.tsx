@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { IBtnVariant } from '@/types/IBtnVariant';
 
+import AppToaster from './AppToaster';
 import BottomSheetModal from './BottomSheetModal';
 import { ThemedButton } from './ThemedButton';
 import { ThemedText } from './ThemedText';
@@ -67,6 +68,8 @@ const ConfirmationModal = ({
 					/>
 				</View>
 			</ThemedView>
+
+			<AppToaster />
 		</BottomSheetModal>
 	);
 };

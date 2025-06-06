@@ -27,7 +27,8 @@ const CommentMenuOptions = ({ visible, onClose, comment }: Props) => {
 				})
 				.catch(() => {
 					toastService.error('Error deleting comment');
-				});
+				})
+				.finally(() => setIsConfirmationOpen(false));
 		}
 	};
 

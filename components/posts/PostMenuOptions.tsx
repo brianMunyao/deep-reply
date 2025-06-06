@@ -27,7 +27,8 @@ const PostMenuOptions = ({ visible, onClose, post }: Props) => {
 				})
 				.catch(() => {
 					toastService.error('Error deleting post');
-				});
+				})
+				.finally(() => setIsConfirmationOpen(false));
 		}
 	};
 
