@@ -11,6 +11,7 @@ import { IComment } from '@/types/IComment';
 import Avatar from '../global/Avatar';
 
 import relativeTime from 'dayjs/plugin/relativeTime';
+import CommentMenuOptions from './CommentMenuOptions';
 
 dayjs.extend(relativeTime);
 
@@ -41,6 +42,9 @@ const NestedCommentItem = ({
 	const [liked, setLiked] = useState(false);
 	const [expanded, setExpanded] = useState(false);
 
+	const [isCommentOptionsOpen, setIsCommentOptionsOpen] = useState(false);
+	const [openedComment, setOpenedComment] = useState<IComment | null>(null);
+
 	const handleLike = () => {
 		setLiked(!liked);
 	};
@@ -54,173 +58,191 @@ const NestedCommentItem = ({
 			: new Date(comment.created_at);
 	const timeAgo = dayjs(createdAt).fromNow();
 
-	// Calculate indentation based on depth level, but cap at maxDepth
 	const indentLevel = Math.min(comment.depth_level, maxDepth);
 	const marginLeft = indentLevel * 16;
 
-	// Show "View More Replies" button if depth is at maxDepth and has children
 	const shouldShowViewMore =
 		comment.depth_level >= maxDepth && comment.child_count > 0;
 
 	return (
-		<View style={[styles.container, { marginLeft }]}>
-			<View style={styles.commentContainer}>
-				<Avatar
-					uri={comment.user_details.avatar}
-					size={comment.depth_level > 2 ? 28 : 32}
-					name={comment.user_details.display_name}
-				/>
+		<>
+			<View style={[styles.container, { marginLeft }]}>
+				<View style={styles.commentContainer}>
+					<Avatar
+						uri={comment.user_details.avatar}
+						size={comment.depth_level > 2 ? 28 : 32}
+						name={comment.user_details.display_name}
+					/>
 
-				<View style={styles.contentContainer}>
-					<ThemedView
-						style={[
-							styles.bubble,
-							{ backgroundColor: cardBackground },
-						]}
-					>
-						<View style={styles.header}>
-							<View style={styles.userInfo}>
-								<ThemedText style={styles.username}>
-									{comment.user_details.display_name}
-								</ThemedText>
-								<ThemedText style={styles.handle}>
-									@{comment.user_details.user_handle}
-								</ThemedText>
-								<ThemedText style={styles.timestamp}>
-									· {timeAgo}
-								</ThemedText>
+					<View style={styles.contentContainer}>
+						<ThemedView
+							style={[
+								styles.bubble,
+								{ backgroundColor: cardBackground },
+							]}
+						>
+							<View style={styles.header}>
+								<View style={styles.userInfo}>
+									<ThemedText style={styles.username}>
+										{comment.user_details.display_name}
+									</ThemedText>
+									<ThemedText style={styles.handle}>
+										@{comment.user_details.user_handle}
+									</ThemedText>
+									<ThemedText style={styles.timestamp}>
+										· {timeAgo}
+									</ThemedText>
+								</View>
+
+								{comment.child_count > 0 &&
+									onToggleCollapse && (
+										<TouchableOpacity
+											style={styles.collapseButton}
+											onPress={() =>
+												onToggleCollapse(comment.id)
+											}
+										>
+											{isCollapsed ? (
+												<Ionicons
+													name="chevron-forward"
+													size={16}
+													color={mutedColor}
+												/>
+											) : (
+												<Ionicons
+													name="chevron-down"
+													size={16}
+													color={mutedColor}
+												/>
+											)}
+										</TouchableOpacity>
+									)}
 							</View>
 
-							{comment.child_count > 0 && onToggleCollapse && (
+							<ThemedText style={styles.content}>
+								{expanded
+									? comment.content
+									: comment.content.length > 150
+									? `${comment.content.substring(0, 150)}...`
+									: comment.content}
+							</ThemedText>
+
+							{comment.content.length > 150 && (
 								<TouchableOpacity
-									style={styles.collapseButton}
-									onPress={() => onToggleCollapse(comment.id)}
+									onPress={() => setExpanded(!expanded)}
 								>
-									{isCollapsed ? (
-										<Ionicons
-											name="chevron-forward"
-											size={16}
-											color={mutedColor}
+									<ThemedText style={styles.readMore}>
+										{expanded ? 'Show less' : 'Read more'}
+									</ThemedText>
+								</TouchableOpacity>
+							)}
+
+							{hasMedia && (
+								<View style={styles.mediaContainer}>
+									{comment.images.map((img, index) => (
+										<Image
+											key={`img-${index}`}
+											source={{ uri: img?.url || '' }}
+											style={styles.media}
 										/>
-									) : (
-										<Ionicons
-											name="chevron-down"
-											size={16}
-											color={mutedColor}
+									))}
+									{comment.gifs.map((gif, index) => (
+										<Image
+											key={`gif-${index}`}
+											source={{ uri: gif?.url || '' }}
+											style={styles.media}
 										/>
+									))}
+								</View>
+							)}
+						</ThemedView>
+
+						<View style={styles.actions}>
+							<View style={styles.actionButtons}>
+								<TouchableOpacity
+									style={styles.actionButton}
+									onPress={handleLike}
+								>
+									<Ionicons
+										name="heart"
+										size={14}
+										color={liked ? '#FF4D4D' : mutedColor}
+										fill={liked ? '#FF4D4D' : 'transparent'}
+									/>
+									{comment.score > 0 && (
+										<ThemedText
+											style={[
+												styles.actionCount,
+												liked && { color: '#FF4D4D' },
+											]}
+										>
+											{comment.score}
+										</ThemedText>
 									)}
+								</TouchableOpacity>
+
+								<TouchableOpacity
+									style={styles.actionButton}
+									onPress={() => onReply(comment)}
+								>
+									{/* <Reply size={14} color={mutedColor} /> */}
+									<ThemedText style={styles.actionText}>
+										Reply
+									</ThemedText>
+								</TouchableOpacity>
+
+								<TouchableOpacity
+									style={styles.actionButton}
+									onPress={() => {
+										setIsCommentOptionsOpen(true);
+										setOpenedComment(comment);
+									}}
+								>
+									<Ionicons
+										name="ellipsis-horizontal"
+										size={14}
+										color={mutedColor}
+									/>
+								</TouchableOpacity>
+							</View>
+
+							{shouldShowViewMore && onViewMoreReplies && (
+								<TouchableOpacity
+									style={styles.viewMoreButton}
+									onPress={() =>
+										onViewMoreReplies(comment.id)
+									}
+								>
+									<ThemedText style={styles.viewMoreText}>
+										View {comment.child_count} more replies
+										→
+									</ThemedText>
 								</TouchableOpacity>
 							)}
 						</View>
-
-						<ThemedText style={styles.content}>
-							{expanded
-								? comment.content
-								: comment.content.length > 150
-								? `${comment.content.substring(0, 150)}...`
-								: comment.content}
-						</ThemedText>
-
-						{comment.content.length > 150 && (
-							<TouchableOpacity
-								onPress={() => setExpanded(!expanded)}
-							>
-								<ThemedText style={styles.readMore}>
-									{expanded ? 'Show less' : 'Read more'}
-								</ThemedText>
-							</TouchableOpacity>
-						)}
-
-						{hasMedia && (
-							<View style={styles.mediaContainer}>
-								{comment.images.map((img, index) => (
-									<Image
-										key={`img-${index}`}
-										source={{ uri: img?.url || '' }}
-										style={styles.media}
-									/>
-								))}
-								{comment.gifs.map((gif, index) => (
-									<Image
-										key={`gif-${index}`}
-										source={{ uri: gif?.url || '' }}
-										style={styles.media}
-									/>
-								))}
-							</View>
-						)}
-					</ThemedView>
-
-					<View style={styles.actions}>
-						<View style={styles.actionButtons}>
-							<TouchableOpacity
-								style={styles.actionButton}
-								onPress={handleLike}
-							>
-								<Ionicons
-									name="heart"
-									size={14}
-									color={liked ? '#FF4D4D' : mutedColor}
-									fill={liked ? '#FF4D4D' : 'transparent'}
-								/>
-								{comment.score > 0 && (
-									<ThemedText
-										style={[
-											styles.actionCount,
-											liked && { color: '#FF4D4D' },
-										]}
-									>
-										{comment.score}
-									</ThemedText>
-								)}
-							</TouchableOpacity>
-
-							<TouchableOpacity
-								style={styles.actionButton}
-								onPress={() => onReply(comment)}
-							>
-								{/* <Reply size={14} color={mutedColor} /> */}
-								<ThemedText style={styles.actionText}>
-									Reply
-								</ThemedText>
-							</TouchableOpacity>
-
-							<TouchableOpacity style={styles.actionButton}>
-								<Ionicons
-									name="ellipsis-horizontal"
-									size={14}
-									color={mutedColor}
-								/>
-							</TouchableOpacity>
-						</View>
-
-						{shouldShowViewMore && onViewMoreReplies && (
-							<TouchableOpacity
-								style={styles.viewMoreButton}
-								onPress={() => onViewMoreReplies(comment.id)}
-							>
-								<ThemedText style={styles.viewMoreText}>
-									View {comment.child_count} more replies →
-								</ThemedText>
-							</TouchableOpacity>
-						)}
 					</View>
 				</View>
+
+				{/* Thread line for nested comments */}
+				{comment.depth_level > 0 && (
+					<View
+						style={[
+							styles.threadLine,
+							{
+								left: (comment.depth_level - 1) * 16 + 16,
+								borderColor: borderColor,
+							},
+						]}
+					/>
+				)}
 			</View>
 
-			{/* Thread line for nested comments */}
-			{comment.depth_level > 0 && (
-				<View
-					style={[
-						styles.threadLine,
-						{
-							left: (comment.depth_level - 1) * 16 + 16,
-							borderColor: borderColor,
-						},
-					]}
-				/>
-			)}
-		</View>
+			<CommentMenuOptions
+				visible={isCommentOptionsOpen}
+				onClose={() => setIsCommentOptionsOpen(false)}
+				comment={openedComment}
+			/>
+		</>
 	);
 };
 

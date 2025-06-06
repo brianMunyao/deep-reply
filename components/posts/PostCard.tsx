@@ -4,7 +4,6 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { IPost } from '@/types/IPost';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
-
 import {
 	Alert,
 	Animated,
@@ -16,6 +15,7 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
+import PostMenuOptions from './PostMenuOptions';
 
 type Props = {
 	post: IPost;
@@ -38,7 +38,6 @@ const PostCard = ({
 	showActions = true,
 	compact = false,
 }: Props) => {
-	// State
 	const [liked, setLiked] = useState(false);
 	const [bookmarked, setBookmarked] = useState(false);
 	const [expanded, setExpanded] = useState(false);
@@ -54,6 +53,9 @@ const PostCard = ({
 	const mutedColor = useThemeColor({}, 'secondary');
 	const tintColor = useThemeColor({}, 'tint');
 	const borderColor = useThemeColor({}, 'separator');
+
+	const [isPostOptionsOpen, setIsPostOptionsOpen] = useState(false);
+	const [openedPost, setOpenedPost] = useState<IPost | null>(null);
 
 	// Computed values
 	const hasMedia = useMemo(() => {
@@ -284,101 +286,120 @@ const PostCard = ({
 		);
 	};
 
-	const renderMoreMenu = () => (
-		<TouchableOpacity style={styles.moreButton} activeOpacity={0.7}>
-			<Ionicons name="ellipsis-horizontal" size={20} color={mutedColor} />
-		</TouchableOpacity>
-	);
-
 	return (
-		<Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-			<TouchableOpacity activeOpacity={0.95} onPress={handlePress}>
-				<ThemedView
-					style={[
-						styles.card,
-						{ backgroundColor: cardBackground },
-						compact && styles.compactCard,
-					]}
-				>
-					{/* Header */}
-					<View style={styles.header}>
-						<View style={styles.titleContainer}>
-							<ThemedText
-								style={[
-									styles.title,
-									compact && styles.compactTitle,
-								]}
-								numberOfLines={compact ? 1 : 2}
-							>
-								{post.title}
-							</ThemedText>
-						</View>
-						{renderMoreMenu()}
-					</View>
-
-					{/* Content */}
-					<View style={styles.contentContainer}>
-						<ThemedText
-							style={[
-								styles.content,
-								compact && styles.compactContent,
-							]}
-							numberOfLines={compact ? 2 : undefined}
-						>
-							{displayContent}
-						</ThemedText>
-
-						{shouldTruncateContent && !compact && (
-							<TouchableOpacity
-								onPress={() => setExpanded(!expanded)}
-								style={styles.expandButton}
-							>
+		<>
+			<Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+				<TouchableOpacity activeOpacity={0.95} onPress={handlePress}>
+					<ThemedView
+						style={[
+							styles.card,
+							{ backgroundColor: cardBackground },
+							compact && styles.compactCard,
+						]}
+					>
+						{/* Header */}
+						<View style={styles.header}>
+							<View style={styles.titleContainer}>
 								<ThemedText
 									style={[
-										styles.expandText,
+										styles.title,
+										compact && styles.compactTitle,
+									]}
+									numberOfLines={compact ? 1 : 2}
+								>
+									{post.title}
+								</ThemedText>
+							</View>
+
+							<TouchableOpacity
+								style={styles.moreButton}
+								activeOpacity={0.7}
+								onPress={() => {
+									setIsPostOptionsOpen(true);
+									setOpenedPost(post);
+								}}
+							>
+								<Ionicons
+									name="ellipsis-horizontal"
+									size={20}
+									color={mutedColor}
+								/>
+							</TouchableOpacity>
+						</View>
+
+						{/* Content */}
+						<View style={styles.contentContainer}>
+							<ThemedText
+								style={[
+									styles.content,
+									compact && styles.compactContent,
+								]}
+								numberOfLines={compact ? 2 : undefined}
+							>
+								{displayContent}
+							</ThemedText>
+
+							{shouldTruncateContent && !compact && (
+								<TouchableOpacity
+									onPress={() => setExpanded(!expanded)}
+									style={styles.expandButton}
+								>
+									<ThemedText
+										style={[
+											styles.expandText,
+											{ color: tintColor },
+										]}
+									>
+										{expanded ? 'Show less' : 'Read more'}
+									</ThemedText>
+								</TouchableOpacity>
+							)}
+						</View>
+
+						{/* Media */}
+						{!compact && renderMedia()}
+
+						{/* Link Preview */}
+						{post.link && (
+							<TouchableOpacity
+								style={[styles.linkContainer, { borderColor }]}
+								onPress={handleLinkPress}
+								activeOpacity={0.8}
+							>
+								<Ionicons
+									name="link-outline"
+									size={16}
+									color={tintColor}
+								/>
+								<ThemedText
+									style={[
+										styles.linkText,
 										{ color: tintColor },
 									]}
+									numberOfLines={1}
 								>
-									{expanded ? 'Show less' : 'Read more'}
+									{post.link}
 								</ThemedText>
+								<Ionicons
+									name="open-outline"
+									size={14}
+									color={mutedColor}
+								/>
 							</TouchableOpacity>
 						)}
-					</View>
 
-					{/* Media */}
-					{!compact && renderMedia()}
+						{/* Actions */}
+						{renderActions()}
+					</ThemedView>
+				</TouchableOpacity>
+			</Animated.View>
 
-					{/* Link Preview */}
-					{post.link && (
-						<TouchableOpacity
-							style={[styles.linkContainer, { borderColor }]}
-							onPress={handleLinkPress}
-							activeOpacity={0.8}
-						>
-							<Ionicons
-								name="link-outline"
-								size={16}
-								color={tintColor}
-							/>
-							<ThemedText
-								style={[styles.linkText, { color: tintColor }]}
-								numberOfLines={1}
-							>
-								{post.link}
-							</ThemedText>
-							<Ionicons
-								name="open-outline"
-								size={14}
-								color={mutedColor}
-							/>
-						</TouchableOpacity>
-					)}
-
-					{/* Actions */}
-					{renderActions()}
-				</ThemedView>
-			</TouchableOpacity>
-		</Animated.View>
+			<PostMenuOptions
+				visible={isPostOptionsOpen}
+				onClose={() => setIsPostOptionsOpen(false)}
+				post={openedPost}
+			/>
+		</>
 	);
 };
 

@@ -6,14 +6,9 @@ import toastService from '@/services/global/toastService';
 import postsService, { COMMUNITY_ID } from '@/services/posts/postsService';
 import { IPostNew } from '@/types/IPost';
 import React, { useMemo, useRef, useState } from 'react';
-import {
-	ActivityIndicator,
-	Animated,
-	StyleSheet,
-	TouchableOpacity,
-	View,
-} from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
 import BottomSheetModal from '../global/BottomSheetModal';
+import { ThemedButton } from '../global/ThemedButton';
 
 interface Props {
 	visible: boolean;
@@ -196,28 +191,14 @@ const CreatePostModal: React.FC<Props> = ({
 					</View>
 				</ThemedView>
 
-				<TouchableOpacity
-					style={[
-						styles.draftButton,
-						{
-							backgroundColor: isFormValid
-								? tintColor
-								: mutedColor,
-							opacity: loading ? 0.6 : 1,
-						},
-					]}
+				<ThemedButton
+					label="Post"
+					loading={loading}
 					onPress={handleCreatePost}
-					disabled={!isFormValid || loading}
-					activeOpacity={0.8}
+					disabled={!isFormValid}
 				>
-					{loading ? (
-						<ActivityIndicator size="small" color="#fff" />
-					) : (
-						<ThemedText style={styles.draftButtonText}>
-							Post
-						</ThemedText>
-					)}
-				</TouchableOpacity>
+					Post
+				</ThemedButton>
 			</ThemedView>
 		</BottomSheetModal>
 	);
@@ -225,7 +206,8 @@ const CreatePostModal: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
 	modalContainer: {
-		// flex: 1,
+		flex: 1,
+		margin: 0,
 	},
 	container: {
 		// flex: 1,
