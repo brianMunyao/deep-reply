@@ -13,9 +13,10 @@ type Props = {
 	visible: boolean;
 	onClose: () => void;
 	comment?: IComment | null;
+	onDelete?: () => void;
 };
 
-const CommentMenuOptions = ({ visible, onClose, comment }: Props) => {
+const CommentMenuOptions = ({ visible, onClose, comment, onDelete }: Props) => {
 	const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
 
 	const deleteComment = async () => {
@@ -23,6 +24,7 @@ const CommentMenuOptions = ({ visible, onClose, comment }: Props) => {
 			commentsService
 				.deleteComment(comment.id)
 				.then((res) => {
+					onDelete?.();
 					toastService.success('Comment deleted');
 				})
 				.catch(() => {

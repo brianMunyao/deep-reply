@@ -21,21 +21,15 @@ const CreatePostModal: React.FC<Props> = ({
 	onClose,
 	onPostCreated,
 }) => {
-	// Form state
 	const [title, setTitle] = useState('');
 	const [content, setContent] = useState('');
 	const [link, setLink] = useState('');
 	const [loading, setLoading] = useState(false);
 
-	// Animation
 	const slideAnim = useRef(new Animated.Value(0)).current;
 	const fadeAnim = useRef(new Animated.Value(0)).current;
 
-	// Theme colors
-	const cardBackgroundColor = useThemeColor({}, 'cardBackground');
 	const backgroundColor = useThemeColor({}, 'background');
-	const textColor = useThemeColor({}, 'text');
-	const tintColor = useThemeColor({}, 'tint');
 	const borderColor = useThemeColor({}, 'separator');
 	const mutedColor = useThemeColor({}, 'secondary');
 

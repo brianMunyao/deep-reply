@@ -23,6 +23,7 @@ type Props = {
 	showViewMoreButton?: boolean;
 	isCollapsed?: boolean;
 	onToggleCollapse?: (commentId: string) => void;
+	onDelete?: () => void;
 };
 
 const NestedCommentItem = ({
@@ -33,6 +34,7 @@ const NestedCommentItem = ({
 	showViewMoreButton = false,
 	isCollapsed = false,
 	onToggleCollapse,
+	onDelete,
 }: Props) => {
 	const cardBackground = useThemeColor({}, 'cardBackground');
 	const textColor = useThemeColor({}, 'text');
@@ -241,6 +243,7 @@ const NestedCommentItem = ({
 				visible={isCommentOptionsOpen}
 				onClose={() => setIsCommentOptionsOpen(false)}
 				comment={openedComment}
+				onDelete={onDelete}
 			/>
 		</>
 	);

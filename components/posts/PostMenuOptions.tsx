@@ -5,6 +5,8 @@ import { ThemedText } from '../global/ThemedText';
 
 import toastService from '@/services/global/toastService';
 import postsService from '@/services/posts/postsService';
+import { useAppDispatch } from '@/store/hooks';
+import { removePost } from '@/store/slices/postsSlice';
 import { IPost } from '@/types/IPost';
 import { Ionicons } from '@expo/vector-icons';
 import ConfirmationModal from '../global/ConfirmationModal';
@@ -17,12 +19,14 @@ type Props = {
 
 const PostMenuOptions = ({ visible, onClose, post }: Props) => {
 	const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+	const dispatch = useAppDispatch();
 
 	const deletePost = async () => {
 		if (post) {
 			postsService
 				.deletePost(post.id)
 				.then((res) => {
+					dispatch(removePost(post.id));
 					toastService.success('Post deleted');
 				})
 				.catch(() => {

@@ -249,6 +249,12 @@ const PostDetailScreen = () => {
 		});
 	}, []);
 
+	const handleCommentDelete = (commentId: string) => {
+		setComments((_comments) => {
+			return _comments.filter((c) => c.id !== commentId);
+		});
+	};
+
 	const renderComment = useCallback(
 		({ item, index }: { item: IComment; index: number }) => {
 			// Don't render if parent is collapsed
@@ -273,6 +279,7 @@ const PostDetailScreen = () => {
 						maxDepth={maxDepth}
 						isCollapsed={collapsedComments.has(item.id)}
 						onToggleCollapse={handleToggleCollapse}
+						onDelete={() => handleCommentDelete(item.id)}
 					/>
 				</Animated.View>
 			);

@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import toastService from '@/services/global/toastService';
 import postsService from '@/services/posts/postsService';
+import { setPosts, setPostsLoading } from '@/store/slices/postsSlice';
 import { IPost } from '@/types/IPost';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -23,11 +24,15 @@ import {
 	View,
 } from 'react-native';
 
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+
 const MainScreen: React.FC = () => {
 	const navigation = useNavigation();
 	const { user, logout } = useAuth();
-	const [posts, setPosts] = useState<IPost[]>([]);
-	const [loading, setLoading] = useState(true);
+
+	const { posts, loading } = useAppSelector((state) => state.posts);
+	const dispatch = useAppDispatch();
+
 	const [refreshing, setRefreshing] = useState(false);
 	const [showCreateModal, setShowCreateModal] = useState(false);
 
@@ -39,17 +44,18 @@ const MainScreen: React.FC = () => {
 
 	const fetchPosts = useCallback(async () => {
 		try {
-			setLoading(true);
+			dispatch(setPostsLoading(true));
 			const res = await postsService.getPosts({
 				page: nextPage || undefined,
 			});
 			setNextPage(res.nextPage);
-			setPosts(res.items);
+
+			dispatch(setPosts(res.items));
 		} catch (error) {
 			console.error('Error fetching posts:', error);
 			toastService.error('Failed to load posts');
 		} finally {
-			setLoading(false);
+			dispatch(setPostsLoading(false));
 			setRefreshing(false);
 		}
 	}, []);
@@ -63,11 +69,10 @@ const MainScreen: React.FC = () => {
 		if (nextPage) {
 			setIsFetchingMore(true);
 
-			toastService.info('fetching page: ' + nextPage);
-
 			const res = await postsService.getPosts({ page: nextPage });
 			setNextPage(res.nextPage);
-			setPosts((existingPosts) => [...existingPosts, ...res.items]);
+
+			dispatch(setPosts([...posts, ...res.items]));
 
 			setIsFetchingMore(false);
 		}
@@ -111,7 +116,7 @@ const MainScreen: React.FC = () => {
 		<ThemedSafeAreaView style={styles.container}>
 			<FlatList
 				data={posts}
-				keyExtractor={(item) => item.id}
+				keyExtractor={(item) => item.post_id}
 				renderItem={renderPost}
 				refreshControl={
 					<RefreshControl

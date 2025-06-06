@@ -4,10 +4,12 @@ import {
 	ThemeProvider,
 } from '@react-navigation/native';
 import React, { PropsWithChildren } from 'react';
+import { Provider } from 'react-redux';
 
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme.web';
 
+import { store } from '@/store/store';
 import AppToaster from './AppToaster';
 
 type Props = PropsWithChildren<object>;
@@ -20,8 +22,10 @@ const Providers = ({ children }: Props) => {
 			<ThemeProvider
 				value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
 			>
-				{children}
-				<AppToaster />
+				<Provider store={store}>
+					{children}
+					<AppToaster />
+				</Provider>
 			</ThemeProvider>
 		</AuthProvider>
 	);
